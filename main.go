@@ -33,8 +33,6 @@ type User struct {
 
 var users = map[string]User{
 	"root": {Password: "toor", Name: "hacker", Role: "Administrator"},
-	"user":  {Password: "user123", Name: "User", Role: "User"},
-	"demo":  {Password: "demo", Name: "Demo User", Role: "Demo"},
 }
 
 // Sesi untuk menyimpan token
