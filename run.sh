@@ -22,15 +22,15 @@ print_step() {
 }
 
 print_success() {
-    echo -e "${C_GREEN}âœ“ ${1}${C_RESET}"
+    echo -e "${C_GREEN}✓ ${1}${C_RESET}"
 }
 
 print_warning() {
-    echo -e "${C_YELLOW}âš  ${1}${C_RESET}"
+    echo -e "${C_YELLOW}⚠ ${1}${C_RESET}"
 }
 
 print_error() {
-    echo -e "${C_RED}âœ— ERROR: ${1}${C_RESET}"
+    echo -e "${C_RED}✗ ERROR: ${1}${C_RESET}"
 }
 
 check_command() {
@@ -49,9 +49,12 @@ install_go() {
         echo -e "\n# Go lang PATH" >> "$HOME/.bashrc"
         echo 'export PATH=$PATH:/usr/local/go/bin' >> "$HOME/.bashrc"
         print_success "Go PATH added to ~/.bashrc."
-        print_warning "Please run 'source ~/.bashrc' or open a new terminal for changes to take effect."
+        
+        print_step "Applying changes by sourcing ~/.bashrc..."
+        source "$HOME/.bashrc"
     fi
 
+    # Fallback export just in case
     export PATH=$PATH:/usr/local/go/bin
 }
 
@@ -74,7 +77,20 @@ EOF
 echo -e "${C_RESET}"
 print_header "Advanced HTTP Request Tool - Installer & Launcher"
 
-# 1. Warning and Root Check
+# 1. Create backup of main.go on first run
+print_step "Performing initial check..."
+if [ ! -f "main.go.orig" ]; then
+    if [ -f "main.go" ]; then
+        print_warning "Creating an original backup of main.go as main.go.orig..."
+        cp main.go main.go.orig
+        print_success "Backup created."
+    else
+        print_error "main.go not found! Cannot create a backup. Please ensure the file is present."
+        exit 1
+    fi
+fi
+
+# 2. Warning and Root Check
 print_warning "This script will install packages (Go, Screen) and modify system files."
 echo "It's recommended to run as root, but a user with sudo privileges will also work."
 echo ""
@@ -90,11 +106,11 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
     exit 1
 fi
 
-# 2. System Update
+# 3. System Update
 print_step "Performing system update (apt update && apt upgrade)"
 $SUDO apt-get update && $SUDO apt-get upgrade -y
 
-# 3. Check & Kill Running Screen Sessions
+# 4. Check & Kill Running Screen Sessions
 print_step "Checking for existing Screen sessions..."
 if check_command screen && screen -ls | grep -q "$BACKEND_SESSION_NAME"; then
     print_warning "Found running '$BACKEND_SESSION_NAME' session. Terminating..."
@@ -106,7 +122,7 @@ if check_command screen && screen -ls | grep -q "$FRONTEND_SESSION_NAME"; then
 fi
 print_success "All old sessions have been cleaned up."
 
-# 4. Check & Install Dependencies
+# 5. Check & Install Dependencies
 print_step "Checking and installing dependencies..."
 if ! check_command go; then
     install_go
@@ -127,7 +143,7 @@ else
     print_success "Screen is already installed."
 fi
 
-# 5. Application Configuration
+# 6. Application Configuration
 print_step "Application Configuration"
 read -p "Enter your Full Name: " FULL_NAME
 read -p "Enter a new Username for the panel: " USERNAME
@@ -138,29 +154,31 @@ PORT_BACKEND=${PORT_BACKEND:-8080}
 read -p "Enter the port for the Frontend (default: 8082): " PORT_FRONTEND
 PORT_FRONTEND=${PORT_FRONTEND:-8082}
 
-# 6. Configure Source Files
+# 7. Configure Source Files
 print_step "Configuring source files (main.go & index.html)..."
-if [ ! -f "main.go" ] || [ ! -f "index.html" ]; then
-    print_error "main.go or index.html not found in the current directory. Aborting."
-    exit 1
-fi
+# Restore main.go from backup before modifying to ensure sed command works every time
+print_warning "Restoring main.go from backup before configuration..."
+cp main.go.orig main.go
+print_success "main.go restored."
 
-# Modify main.go for user credentials and port
-sed -i "s/\"admin\": {Password: \".*\", Name: \".*\", Role: \".*\"}/\"$USERNAME\": {Password: \"$PASSWORD\", Name: \"$FULL_NAME\", Role: \"Administrator\"}/" main.go
+# Modify main.go for user credentials and port. Using '#' as a delimiter to avoid conflicts with passwords.
+sed -i "s#\"root\": {Password: \".*\", Name: \".*\", Role: \".*\"}#\"$USERNAME\": {Password: \"$PASSWORD\", Name: \"$FULL_NAME\", Role: \"Administrator\"}#" main.go
 sed -i "s/port := \".*\"/port := \"$PORT_BACKEND\"/" main.go
-print_success "main.go configured."
+print_success "main.go configured with new user and port."
 
 # Modify index.html for backend port
+# First, revert to 8080 to handle multiple runs, then set the new port.
+sed -i "s/:[0-9]\{4\}/:8080/g" index.html
 sed -i "s/:8080/:$PORT_BACKEND/g" index.html
-print_success "index.html configured."
+print_success "index.html configured for backend port."
 
-# 7. Setup Go Project
+# 8. Setup Go Project
 print_step "Setting up Go modules..."
 rm -f go.sum
 go mod init go-curl-backend &> /dev/null || true # Ignore error if it already exists
 go get github.com/gorilla/websocket
 
-# 8. Run Application
+# 9. Run Application
 print_step "Launching Backend and Frontend in Screen sessions..."
 if ! check_command python3; then
     print_error "python3 is not installed, which is required to serve the frontend."
@@ -171,7 +189,7 @@ fi
 screen -dmS "$BACKEND_SESSION_NAME" bash -c 'go run main.go'
 screen -dmS "$FRONTEND_SESSION_NAME" bash -c "python3 -m http.server $PORT_FRONTEND"
 
-# 9. Final Summary
+# 10. Final Summary
 sleep 2 # Give a moment for screens to start
 if screen -ls | grep -q "$BACKEND_SESSION_NAME" && screen -ls | grep -q "$FRONTEND_SESSION_NAME"; then
     echo ""
@@ -193,3 +211,4 @@ else
     echo -e "   - To check for backend errors: try running ${C_YELLOW}'go run main.go'${C_RESET} manually."
     echo -e "   - To check for frontend errors: try running ${C_YELLOW}'python3 -m http.server $PORT_FRONTEND'${C_RESET} manually."
 fi
+
