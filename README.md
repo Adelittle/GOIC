@@ -57,7 +57,7 @@ Prerequisites
 
 Installation & Launch
 
-    git clone ithub.com/Adelittle/GOIC/
+    git clone github.com/Adelittle/GOIC/
     cd goic
     bash run.sh
 
