@@ -573,7 +573,7 @@
                         <div class="form-group">
                             <label for="requestMode">Total Request</label>
                             <select id="requestMode" class="form-select" onchange="handleRequestModeChange()">
-                                <option value="infinity" selected>Infinity (Ã¢Ë†Å¾)</option>
+                                <option value="infinity" selected>Infinity (ÃƒÂ¢Ã‹â€ Ã…Â¾)</option>
                                 <option value="custom">Custom Amount</option>
                             </select>
                             <div id="customRequestGroup" style="display: none; margin-top: 0.75rem;">
@@ -991,7 +991,7 @@
             document.getElementById('failedRequests').textContent = stats.failed ?? 0;
 
             const progressBar = document.getElementById('progressFill');
-            if (stats.total === 'Ã¢Ë†Å¾' && isRunning) {
+            if (stats.total === 'ÃƒÂ¢Ã‹â€ Ã…Â¾' && isRunning) {
                 progressBar.style.width = '100%';
                 progressBar.style.animation = 'pulse 2s infinite';
             } else if (typeof stats.total === 'number' && stats.total > 0) {
