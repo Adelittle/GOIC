@@ -1,0 +1,39 @@
+# --- Tahap 1: Builder ---
+# Menggunakan image Go yang ringan (alpine) sebagai dasar untuk kompilasi
+FROM golang:1.24-alpine AS builder
+
+# Menginstal dependensi yang diperlukan untuk kompilasi statis
+RUN apk add --no-cache git gcc libc-dev
+
+# Menentukan direktori kerja di dalam container
+WORKDIR /app
+
+# Menyalin semua file proyek terlebih dahulu.
+# Ini memastikan 'go mod tidy' dapat melihat source code dan mengelola dependensi dengan benar.
+COPY . .
+
+# Membersihkan, memverifikasi dependensi berdasarkan source code, dan membuat go.sum
+RUN go mod tidy
+
+# Mengkompilasi kode Go menjadi satu binary statis yang bisa dieksekusi.
+# CGO_ENABLED=0 penting untuk kompilasi statis agar tidak bergantung pada library C dari sistem.
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /goic-backend .
+
+# --- Tahap 2: Final Image ---
+# Menggunakan image Alpine yang sangat kecil sebagai dasar image akhir
+FROM alpine:latest
+
+# PERBAIKAN: Menginstal 'curl' dan sertifikat SSL di dalam image final
+RUN apk --no-cache add curl ca-certificates
+
+# Menentukan direktori kerja
+WORKDIR /root/
+
+# Menyalin binary yang sudah dikompilasi dari tahap 'builder'
+COPY --from=builder /goic-backend .
+
+# Mengekspos port yang akan digunakan oleh aplikasi
+EXPOSE 8080
+
+# Perintah yang akan dijalankan saat container dimulai
+CMD ["./goic-backend"]
