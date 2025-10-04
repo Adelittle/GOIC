@@ -61,6 +61,15 @@ Installation & Launch
     cd GOIC
     bash run.sh
 
+Docker Install
+
+    git clone https://github.com/Adelittle/GOIC/
+    docker-compose up --build -d
+
+    
+    Login URL  https://<ip>:8082/ 
+    user : root
+    Password : toor
 <div align="center">
 <p>Made with ❤️ nakanosec.com.</p>
 </div>
