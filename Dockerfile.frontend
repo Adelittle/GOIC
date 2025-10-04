@@ -1,0 +1,15 @@
+# Menggunakan image Python resmi yang ringan
+FROM python:3.9-alpine
+
+# Set direktori kerja di dalam container
+WORKDIR /app
+
+# Salin file frontend Anda
+COPY index.html .
+
+# Ekspos port default yang akan digunakan oleh frontend
+EXPOSE 8082
+
+# Jalankan server web Python untuk menyajikan file di port 8082
+CMD ["python", "-m", "http.server", "8082"]
+
