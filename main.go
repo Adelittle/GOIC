@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os" // Import 'os' untuk membaca environment variable
 	"os/exec"
 	"strings"
 	"sync"
@@ -52,7 +53,7 @@ type CurlRequest struct {
 
 // Stats untuk statistik real-time
 type Stats struct {
-	Total   interface{} `json:"total"` // Bisa string "âˆž" atau int
+	Total   interface{} `json:"total"` // Bisa string "∞" atau int
 	Sent    int         `json:"sent"`
 	Success int         `json:"success"`
 	Failed  int         `json:"failed"`
@@ -93,7 +94,7 @@ func startStressTest(ctx context.Context, config CurlRequest) {
 	isProcessRunning = true
 	currentConfig = config // Simpan konfigurasi saat ini
 	if config.Requests == 0 {
-		currentStats = Stats{Total: "âˆž", Sent: 0, Success: 0, Failed: 0}
+		currentStats = Stats{Total: "∞", Sent: 0, Success: 0, Failed: 0}
 	} else {
 		currentStats = Stats{Total: config.Requests, Sent: 0, Success: 0, Failed: 0}
 	}
@@ -461,10 +462,17 @@ func main() {
 
 	go handleMessages()
 
-	port := "8080"
+	// Dapatkan port dari environment variable, dengan fallback ke 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	log.Printf("Server berjalan di http://localhost:%s\n", port)
 
 	if err := http.ListenAndServe(":"+port, corsMiddleware(mux)); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
+
+
