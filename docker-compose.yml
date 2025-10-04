@@ -1,0 +1,32 @@
+# Menentukan versi docker-compose
+version: '3.8'
+
+# Mendefinisikan layanan (container) yang akan dijalankan
+services:
+  # Layanan untuk backend Go
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      # Memetakan port <PORT_HOST>:<PORT_CONTAINER>
+      # Anda bisa mengubah "8080" di kiri ke port lain jika Anda mau
+      - "8080:8080"
+    restart: unless-stopped
+    # Variabel lingkungan untuk backend (jika diperlukan di masa depan)
+    # environment:
+    #   - GIN_MODE=release
+
+  # Layanan untuk frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      # Anda bisa mengubah "8082" di kiri ke port lain
+      - "8082:8082"
+    restart: unless-stopped
+    # Memastikan backend berjalan terlebih dahulu sebelum frontend
+    depends_on:
+      - backend
+
