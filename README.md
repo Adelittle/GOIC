@@ -13,6 +13,38 @@ The powerful Go backend ensures minimal resource consumption while delivering ma
 <p align="center">
 <img src="https://github.com/Adelittle/GOIC/blob/main/image/goic2.png?raw=true" style="border-radius: 8px;" />
 </p>
+
+⚠️ Disclaimer
+
+This tool is intended for educational purposes and for testing applications you have explicit permission to test. Unauthorized use of this tool to attack targets is illegal and strictly prohibited. The developers assume no liability and are not responsible for any misuse of this tool.
+
+🚀 Getting Started
+
+Getting GOIC up and running is as simple as running a single script.
+Prerequisites
+
+    A Linux-based system (Debian/Ubuntu recommended).
+
+    wget, curl, and tar (usually pre-installed).
+
+    Root or sudo privileges.
+
+Installation & Launch
+
+    git clone https://github.com/Adelittle/GOIC/
+    cd GOIC
+    bash run.sh
+
+Docker Install
+
+    git clone https://github.com/Adelittle/GOIC/
+    docker-compose up --build -d
+
+    
+    Login URL  https://<ip>:8082/ 
+    user : root
+    Password : toor
+
 ✨ Key Features
 
     🚀 High-Performance Backend: Written in Go (Golang) to handle thousands of concurrent connections with a minimal memory footprint.
@@ -41,35 +73,7 @@ The powerful Go backend ensures minimal resource consumption while delivering ma
 
     🤖 Automated Installation: A smart run.sh script handles everything from dependency checks to configuration and deployment.
 
-⚠️ Disclaimer
 
-This tool is intended for educational purposes and for testing applications you have explicit permission to test. Unauthorized use of this tool to attack targets is illegal and strictly prohibited. The developers assume no liability and are not responsible for any misuse of this tool.
-🚀 Getting Started
-
-Getting GOIC up and running is as simple as running a single script.
-Prerequisites
-
-    A Linux-based system (Debian/Ubuntu recommended).
-
-    wget, curl, and tar (usually pre-installed).
-
-    Root or sudo privileges.
-
-Installation & Launch
-
-    git clone https://github.com/Adelittle/GOIC/
-    cd GOIC
-    bash run.sh
-
-Docker Install
-
-    git clone https://github.com/Adelittle/GOIC/
-    docker-compose up --build -d
-
-    
-    Login URL  https://<ip>:8082/ 
-    user : root
-    Password : toor
 <div align="center">
 <p>Made with ❤️ nakanosec.com.</p>
 </div>
